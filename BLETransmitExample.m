@@ -19,9 +19,10 @@ for n = 1 : length(array)
     % Configure an advertising channel PDU
     cfgLLAdv = bleLLAdvertisingChannelPDUConfig;
     cfgLLAdv.PDUType         = 'Advertising indication';
-    cfgLLAdv.AdvertisingData = dec2hex(n);
+    cfgLLAdv.AdvertisingData = dec2hex('n');
     cfgLLAdv.AdvertiserAddress = '1234567890AB';
     
+
     % Generate an advertising channel PDU
     messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
     phyMode = 'LE1M'; % Select one mode from the set {'LE1M','LE2M','LE500K','LE125K'}
@@ -30,13 +31,16 @@ for n = 1 : length(array)
     accessAddLen = 32;% Length of access address
     accessAddHex = '8E89BED6';  % Access address value in hexadecimal
     accessAddBin = de2bi(hex2dec(accessAddHex),accessAddLen)'; % Access address in binary
-    
+    disp('Data Configured')
+
     % Generate BLE waveform
     txWaveform = bleWaveformGenerator(messageBits,...
         'Mode',            phyMode,...
         'SamplesPerSymbol',sps,...
         'ChannelIndex',    channelIdx,...
         'AccessAddress',   accessAddBin);
+    disp('Waveform Generated')
+
     % Setup spectrum viewer
     spectrumScope = dsp.SpectrumAnalyzer( ...
         'SampleRate',       symbolRate*sps,...
@@ -45,6 +49,7 @@ for n = 1 : length(array)
         'YLimits',          [-130 0], ...
         'Title',            'Baseband BLE Signal Spectrum', ...
         'YLabel',           'Power spectral density');
+    disp('Viewer Generated')
     
     % Show power spectral density of the BLE signal
     spectrumScope(txWaveform);
@@ -68,6 +73,7 @@ for n = 1 : length(array)
             sigSink(txWaveform);
             % Update the counter
             currentFrame = currentFrame + 1;
+            disp(currentFrame)
         end
     catch ME
         release(sigSink);
