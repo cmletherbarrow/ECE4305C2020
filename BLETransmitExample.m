@@ -1,4 +1,5 @@
-array = ["Loop1","Loop2"]
+array = ["Loop1","Loop2","Loop3"];
+temparray = [34 37 42 45 41 32 39 28 32 40 37 38 34 31 26 36 39 35 36 27 28 41 49 59 51 46 46 32 31];
 
 % Symbol rate based on |'Mode'|
 symbolRate = 1e6;
