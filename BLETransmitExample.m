@@ -39,7 +39,7 @@ symbolRate = 1e6;
     
 for n = 1 : length(array)
     
-    cfgLLAdv.AdvertisingData = dec2hex('n');
+    cfgLLAdv.AdvertisingData = dec2hex(array(n));
     messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
     disp('Data Configured')
 
