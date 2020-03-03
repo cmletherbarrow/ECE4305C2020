@@ -1,5 +1,15 @@
-array = ["Loop1","Loop2","Loop3"];
-temparray = [34 37 42 45 41 32 39 28 32 40 37 38 34 31 26 36 39 35 36 27 28 41 49 59 51 46 46 32 31];
+temparray = [37 32 42 45 41 32 39 28 32 40 37 38 34 31 26 36 39 35 36 27 28 41 49 59 51 46 46 32 31];
+hexarray = [0xEE 0xCC 0xAA];
+
+% tStamps = datetime('now')-minutes(9):minutes(1);datetime('now');
+% channelID = 1009029
+% writekey = 'Q3DENA88AGK5S6SB';
+% for i=1:100
+%     thingSpeakWrite(channelID, data, 'TimeStamp', tStamps, 'WriteKey', WriteKey);
+%     disp('done');
+%     pause(15);
+% end
+
 
 % Symbol rate based on |'Mode'|
 symbolRate = 1e6;
@@ -37,9 +47,9 @@ symbolRate = 1e6;
     connectedRadios = findPlutoRadio; % Discover ADALM-PLUTO radio(s) connected to your computer
     radioID = connectedRadios(1).RadioID;
     
-for n = 1 : length(array)
+for n = 1 : length(hexarray)
     
-    cfgLLAdv.AdvertisingData = dec2hex(array(n));
+    cfgLLAdv.AdvertisingData = hexarray(n);
     messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
     disp('Data Configured')
 
@@ -63,7 +73,7 @@ for n = 1 : length(array)
     sigSink = sdrtx( 'Pluto',...
         'RadioID',           radioID,...
         'CenterFrequency',   txCenterFrequency,...
-        'Gain',              0,...
+        'Gain',              -10,...
         'SamplesPerFrame',   txFrameLength,...
         'BasebandSampleRate',txFrontEndSampleRate);
     currentFrame = 1;
@@ -74,7 +84,7 @@ for n = 1 : length(array)
             sigSink(txWaveform);
             % Update the counter
             currentFrame = currentFrame + 1;
-            disp(currentFrame)
+            disp(hexarray(n))
         end
     catch ME
         release(sigSink);
