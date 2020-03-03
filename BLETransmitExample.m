@@ -5,6 +5,18 @@ symbolRate = 1e6;
 %if strcmp(phyMode,'LE2M')
     %symbolRate = 2e6;
 %end
+%Configure an advertising channel PDU
+ cfgLLAdv = bleLLAdvertisingChannelPDUConfig;
+ cfgLLAdv.PDUType = 'Advertising indication';
+ cfgLLAdv.AdvertiserAddress = '1234567890AB';
+
+ phyMode = 'LE1M'; % Select one mode from the set {'LE1M','LE2M','LE500K','LE125K'}
+ sps = 8;          % Samples per symbol
+ channelIdx = 37;  % Channel index value in the range [0,39]
+ accessAddLen = 32;% Length of access address
+ accessAddHex = '8E89BED6';  % Access address value in hexadecimal
+ accessAddBin = de2bi(hex2dec(accessAddHex),accessAddLen)'; % Access address in binary
+
     % First check if the HSP exists
     if isempty(which('plutoradio.internal.getRootDir'))
         error(message('comm_demos:common:NoSupportPackage', ...
@@ -16,21 +28,9 @@ symbolRate = 1e6;
     radioID = connectedRadios(1).RadioID;
     
 for n = 1 : length(array)
-    % Configure an advertising channel PDU
-    cfgLLAdv = bleLLAdvertisingChannelPDUConfig;
-    cfgLLAdv.PDUType         = 'Advertising indication';
-    cfgLLAdv.AdvertisingData = dec2hex('n');
-    cfgLLAdv.AdvertiserAddress = '1234567890AB';
     
-
-    % Generate an advertising channel PDU
+    cfgLLAdv.AdvertisingData = dec2hex('n');
     messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
-    phyMode = 'LE1M'; % Select one mode from the set {'LE1M','LE2M','LE500K','LE125K'}
-    sps = 8;          % Samples per symbol
-    channelIdx = 37;  % Channel index value in the range [0,39]
-    accessAddLen = 32;% Length of access address
-    accessAddHex = '8E89BED6';  % Access address value in hexadecimal
-    accessAddBin = de2bi(hex2dec(accessAddHex),accessAddLen)'; % Access address in binary
     disp('Data Configured')
 
     % Generate BLE waveform
@@ -79,6 +79,6 @@ for n = 1 : length(array)
         release(sigSink);
         rethrow(ME)
     end
-end
 % Release the signal sink
 release(sigSink)
+end
