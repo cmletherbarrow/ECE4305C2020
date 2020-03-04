@@ -1,60 +1,42 @@
-% Configure an advertising channel PDU
-cfgLLAdv = bleLLAdvertisingChannelPDUConfig;
-cfgLLAdv.PDUType         = 'Advertising indication';
-cfgLLAdv.AdvertisingData = '0123456789ABCDEF';
-cfgLLAdv.AdvertiserAddress = '1234567890AB';
+temparray = [37 32 42 45 41 32 39 28 32 40 37 38 34 31 26 36 39 35 36 27 28 41 49 59 51 46 46 32 31];
+hexarray = [0xEE 0xCC 0xAA];
 
-% Generate an advertising channel PDU
-messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
-phyMode = 'LE1M'; % Select one mode from the set {'LE1M','LE2M','LE500K','LE125K'}
-sps = 8;          % Samples per symbol
-channelIdx = 37;  % Channel index value in the range [0,39]
-accessAddLen = 32;% Length of access address
-accessAddHex = '8E89BED6';  % Access address value in hexadecimal
-accessAddBin = de2bi(hex2dec(accessAddHex),accessAddLen)'; % Access address in binary
+% tStamps = datetime('now')-minutes(9):minutes(1);datetime('now');
+% channelID = 1009029
+% writekey = 'Q3DENA88AGK5S6SB';
+% for i=1:100
+%     thingSpeakWrite(channelID, data, 'TimeStamp', tStamps, 'WriteKey', WriteKey);
+%     disp('done');
+%     pause(15);
+% end
+
 
 % Symbol rate based on |'Mode'|
 symbolRate = 1e6;
-if strcmp(phyMode,'LE2M')
-    symbolRate = 2e6;
-end
+%if strcmp(phyMode,'LE2M')
+    %symbolRate = 2e6;
+%end
+%Configure an advertising channel PDU
+ cfgLLAdv = bleLLAdvertisingChannelPDUConfig;
+ cfgLLAdv.PDUType = 'Advertising indication';
+ cfgLLAdv.AdvertiserAddress = '1234567890AB';
 
-% Generate BLE waveform
-txWaveform = bleWaveformGenerator(messageBits,...
-    'Mode',            phyMode,...
-    'SamplesPerSymbol',sps,...
-    'ChannelIndex',    channelIdx,...
-    'AccessAddress',   accessAddBin);
+ phyMode = 'LE1M'; % Select one mode from the set {'LE1M','LE2M','LE500K','LE125K'}
+ sps = 8;          % Samples per symbol
+ channelIdx = 37;  % Channel index value in the range [0,39]
+ accessAddLen = 32;% Length of access address
+ accessAddHex = '8E89BED6';  % Access address value in hexadecimal
+ accessAddBin = de2bi(hex2dec(accessAddHex),accessAddLen)'; % Access address in binary
 
-% Setup spectrum viewer
-spectrumScope = dsp.SpectrumAnalyzer( ...
-    'SampleRate',       symbolRate*sps,...
-    'SpectrumType',     'Power density', ...
-    'SpectralAverages', 10, ...
-    'YLimits',          [-130 0], ...
-    'Title',            'Baseband BLE Signal Spectrum', ...
-    'YLabel',           'Power spectral density');
-
-% Show power spectral density of the BLE signal
-spectrumScope(txWaveform);
-% Initialize the parameters required for signal source
-txCenterFrequency       = 2.402e9;  % Varies based on channel index value
-txFrameLength           = length(txWaveform);
-txNumberOfFrames        = 1e4;
-txFrontEndSampleRate    = symbolRate*sps;
-
-% The default signal source is 'File'
-signalSink = 'ADALM-PLUTO';
-
-if strcmp(signalSink,'File')
-
-    sigSink = comm.BasebandFileWriter('CenterFrequency',txCenterFrequency,...
-        'Filename','bleCaptures.bb',...
-        'SampleRate',txFrontEndSampleRate);
-    sigSink(txWaveform); % Writing to a baseband file 'bleCaptures.bb'
-
-elseif strcmp(signalSink,'ADALM-PLUTO')
-
+ spectrumScope = dsp.SpectrumAnalyzer( ...
+        'SampleRate',       symbolRate*sps,...
+        'SpectrumType',     'Power density', ...
+        'SpectralAverages', 10, ...
+        'YLimits',          [-130 0], ...
+        'Title',            'Baseband BLE Signal Spectrum', ...
+        'YLabel',           'Power spectral density');
+    disp('Viewer Generated')
+    
     % First check if the HSP exists
     if isempty(which('plutoradio.internal.getRootDir'))
         error(message('comm_demos:common:NoSupportPackage', ...
@@ -64,31 +46,50 @@ elseif strcmp(signalSink,'ADALM-PLUTO')
     end
     connectedRadios = findPlutoRadio; % Discover ADALM-PLUTO radio(s) connected to your computer
     radioID = connectedRadios(1).RadioID;
+    
+for n = 1 : length(hexarray)
+    
+    cfgLLAdv.AdvertisingData = hexarray(n);
+    messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
+    disp('Data Configured')
+
+    % Generate BLE waveform
+    txWaveform = bleWaveformGenerator(messageBits,...
+        'Mode',            phyMode,...
+        'SamplesPerSymbol',sps,...
+        'ChannelIndex',    channelIdx,...
+        'AccessAddress',   accessAddBin);
+    disp('Waveform Generated')
+
+    % Show power spectral density of the BLE signal
+    spectrumScope(txWaveform);
+    
+    % Initialize the parameters required for signal source
+    txCenterFrequency       = 2.402e9;  % Varies based on channel index value
+    txFrameLength           = length(txWaveform);
+    txNumberOfFrames        = 1e4;
+    txFrontEndSampleRate    = symbolRate*sps;
+    
     sigSink = sdrtx( 'Pluto',...
         'RadioID',           radioID,...
         'CenterFrequency',   txCenterFrequency,...
-        'Gain',              0,...
+        'Gain',              -10,...
         'SamplesPerFrame',   txFrameLength,...
         'BasebandSampleRate',txFrontEndSampleRate);
-    % The transfer of baseband data to the SDR hardware is enclosed in a
-    % try/catch block. This means that if an error occurs during the
-    % transmission, the hardware resources used by the SDR System
-    % object(TM) are released.
     currentFrame = 1;
+    spectrumScope(txWaveform);
     try
         while currentFrame <= txNumberOfFrames
             % Data transmission
             sigSink(txWaveform);
             % Update the counter
             currentFrame = currentFrame + 1;
+            disp(hexarray(n))
         end
     catch ME
         release(sigSink);
         rethrow(ME)
     end
-else
-    error('Invalid signal sink. Valid entries are File and ADALM-PLUTO.');
-end
-
 % Release the signal sink
 release(sigSink)
+end
