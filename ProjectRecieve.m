@@ -9,9 +9,9 @@
 
 phyMode = 'LE1M';
 bleParam = helperBLEReceiverConfig(phyMode);
- tStamps = timeofday(datetime('now'))-minutes(9):minutes(1);datetime('now');
- channelID = 1009029
- writekey = 'Q3DENA88AGK5S6SB';
+% tStamps = datetime('now')-minutes(9):minutes(1);datetime('now');
+% channelID = 1009029
+% writekey = 'Q3DENA88AGK5S6SB';
 % for i=1:100
 %     thingSpeakWrite(channelID, data, 'TimeStamp', tStamps, 'WriteKey', WriteKey);
 %     disp('done');

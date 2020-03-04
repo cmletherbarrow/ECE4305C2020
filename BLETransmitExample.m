@@ -1,5 +1,9 @@
 temparray = [37 32 42 45 41 32 39 28 32 40 37 38 34 31 26 36 39 35 36 27 28 41 49 59 51 46 46 32 31];
-%hexarray = [0xEE 0xCC 0xAA];
+hexarray = [0xEE 0xCC 0xAA];
+
+
+
+
 % Symbol rate based on |'Mode'|
 symbolRate = 1e6;
 %if strcmp(phyMode,'LE2M')
@@ -36,9 +40,9 @@ symbolRate = 1e6;
     connectedRadios = findPlutoRadio; % Discover ADALM-PLUTO radio(s) connected to your computer
     radioID = connectedRadios(1).RadioID;
     
-for n = 1 : length(temparray)
+for n = 1 : length(hexarray)
     
-    cfgLLAdv.AdvertisingData = dec2hex(temparray(n));
+    cfgLLAdv.AdvertisingData = hexarray(n);
     messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
     disp('Data Configured')
 
@@ -56,13 +60,13 @@ for n = 1 : length(temparray)
     % Initialize the parameters required for signal source
     txCenterFrequency       = 2.402e9;  % Varies based on channel index value
     txFrameLength           = length(txWaveform);
-    txNumberOfFrames        = 1e3;
+    txNumberOfFrames        = 1e4;
     txFrontEndSampleRate    = symbolRate*sps;
     
     sigSink = sdrtx( 'Pluto',...
         'RadioID',           radioID,...
         'CenterFrequency',   txCenterFrequency,...
-        'Gain',              0,...
+        'Gain',              -10,...
         'SamplesPerFrame',   txFrameLength,...
         'BasebandSampleRate',txFrontEndSampleRate);
     currentFrame = 1;
@@ -73,7 +77,7 @@ for n = 1 : length(temparray)
             sigSink(txWaveform);
             % Update the counter
             currentFrame = currentFrame + 1;
-            disp(temparray(n))
+            disp(hexarray(n))
         end
     catch ME
         release(sigSink);
