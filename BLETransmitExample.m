@@ -1,6 +1,4 @@
 temparray = [37 32 42 45 41 32 39 28 32 40 37 38 34 31 26 36 39 35 36 27 28 41 49 59 51 46 46 32 31];
-hexarray = [0xEE 0xCC 0xAA];
-
 symbolRate = 2e6;
 
 %Configure an advertising channel PDU

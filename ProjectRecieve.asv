@@ -105,12 +105,13 @@ while true
         if displayFlag && ~isempty(cfgLLAdv)
             disp(hex2dec(cfgLLAdv.AdvertisingData));
                 %Write to ThingSpeak cloud API with recieved data. Data can
-                %only be written at a delay of 15s 
+                %only be written at a delay of 15
                  tStamps = datetime('now');
                  thingSpeakWrite(channelID,double(cfgLLAdv.AdvertisingData(end)), 'TimeStamp', tStamps, 'WriteKey', WriteKey);
                  disp('done');
                  pause(15)
         end
+        
         % Release System objects
         release(freqCompensator)
         release(prbDet)
@@ -119,4 +120,12 @@ while true
     
     end 
 
+end
+
+% Determine the PER
+if pktCnt
+    per = 1-(crcCnt/pktCnt);
+    fprintf('Packet error rate for %s mode is %f.\n',bleParam.Mode,per);
+else
+    fprintf('\n No BLE packets were detected.\n')
 end
