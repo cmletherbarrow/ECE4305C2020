@@ -9,9 +9,11 @@
 
 phyMode = 'LE1M';
 bleParam = helperBLEReceiverConfig(phyMode);
-% tStamps = timeofday(datetime('now'))-minutes(9):minutes(1);datetime('now');
-% channelID = 1009029;
-% WriteKey = 'Q3DENA88AGK5S6SB';
+tStamps = datetime('now');%-minutes(22):minutes(1):datetime('now')]';
+ 
+
+channelID = 1009029;
+ WriteKey = 'Q3DENA88AGK5S6SB';
 
 %%
 % *Signal Source*
@@ -139,11 +141,11 @@ while true
     %         fprintf('Advertising PDU Type: %s\n', cfgLLAdv.PDUType);
             %fprintf('Advertising Address: %s\n', hex2deccfgLLAdv.AdvertisingData);
             disp(hex2dec(cfgLLAdv.AdvertisingData));
-%             for i=1:100
-%                 thingSpeakWrite(channelID, cfgLLAdv.AdvertisingData, 'TimeStamp', tStamps, 'WriteKey', WriteKey);
-%                 disp('done');
-%                 pause(15);
-%             end
+             
+                 tStamps = datetime('now');
+                 thingSpeakWrite(channelID,double(cfgLLAdv.AdvertisingData(end)), 'TimeStamp', tStamps, 'WriteKey', WriteKey);
+                 disp('done');
+                 pause(15)
     %         disp((cfgLLAdv.AdvertiserAddress));
         end
         

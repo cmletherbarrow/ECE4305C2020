@@ -1,20 +1,14 @@
 temparray = [37 32 42 45 41 32 39 28 32 40 37 38 34 31 26 36 39 35 36 27 28 41 49 59 51 46 46 32 31];
 hexarray = [0xEE 0xCC 0xAA];
 
+symbolRate = 2e6;
 
-
-
-% Symbol rate based on |'Mode'|
-symbolRate = 1e6;
-%if strcmp(phyMode,'LE2M')
-    %symbolRate = 2e6;
-%end
 %Configure an advertising channel PDU
  cfgLLAdv = bleLLAdvertisingChannelPDUConfig;
  cfgLLAdv.PDUType = 'Advertising indication';
  cfgLLAdv.AdvertiserAddress = '1234567890AB';
 
- phyMode = 'LE1M'; % Select one mode from the set {'LE1M','LE2M','LE500K','LE125K'}
+ phyMode = 'LE2M'; % Select one mode from the set {'LE1M','LE2M','LE500K','LE125K'}
  sps = 8;          % Samples per symbol
  channelIdx = 37;  % Channel index value in the range [0,39]
  accessAddLen = 32;% Length of access address
@@ -40,9 +34,9 @@ symbolRate = 1e6;
     connectedRadios = findPlutoRadio; % Discover ADALM-PLUTO radio(s) connected to your computer
     radioID = connectedRadios(1).RadioID;
     
-for n = 1 : length(hexarray)
+for n = 1 : length(temparray)
     
-    cfgLLAdv.AdvertisingData = hexarray(n);
+    cfgLLAdv.AdvertisingData = dec2hex(temparray(n));
     messageBits = bleLLAdvertisingChannelPDU(cfgLLAdv);
     disp('Data Configured')
 
@@ -54,22 +48,23 @@ for n = 1 : length(hexarray)
         'AccessAddress',   accessAddBin);
     disp('Waveform Generated')
 
-    % Show power spectral density of the BLE signal
-    spectrumScope(txWaveform);
+    
     
     % Initialize the parameters required for signal source
     txCenterFrequency       = 2.402e9;  % Varies based on channel index value
     txFrameLength           = length(txWaveform);
-    txNumberOfFrames        = 1e4;
+    txNumberOfFrames        = 1e3;
     txFrontEndSampleRate    = symbolRate*sps;
     
     sigSink = sdrtx( 'Pluto',...
         'RadioID',           radioID,...
         'CenterFrequency',   txCenterFrequency,...
-        'Gain',              -10,...
+        'Gain',              0,...
         'SamplesPerFrame',   txFrameLength,...
         'BasebandSampleRate',txFrontEndSampleRate);
     currentFrame = 1;
+    
+    % Show power spectral density of the BLE signal
     spectrumScope(txWaveform);
     try
         while currentFrame <= txNumberOfFrames
@@ -77,7 +72,7 @@ for n = 1 : length(hexarray)
             sigSink(txWaveform);
             % Update the counter
             currentFrame = currentFrame + 1;
-            disp(hexarray(n))
+            disp(temparray(n))
         end
     catch ME
         release(sigSink);
